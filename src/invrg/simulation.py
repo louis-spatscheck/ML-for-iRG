@@ -1,4 +1,3 @@
-import scipy.constants
 from invrg.ising import cising
 import numpy as np
 import os.path
@@ -7,7 +6,6 @@ import gzip
 import tqdm
 import multiprocessing
 import argparse
-import scipy
 
 
 
@@ -62,7 +60,7 @@ def set_configuration(
         simulation : cising.IsingModel,
         configuration : np.array
     ) -> None:
-    length = simulation.as_numpy().shape()[0]
+    length = simulation.as_numpy().shape[0]
     for row in range(length):
         for column in range(length):
             simulation.set_spin(row, column, configuration[row , column])
@@ -82,6 +80,18 @@ def run_simulation(
         measurements : int,
         steps_per_measurement : int = None
     ) -> None:
+    """Run a Metropolis simulation and save the result to ``file`` (gzipped pickle).
+
+    One measurement (energy, magnetization) is taken every
+    ``steps_per_measurement`` spin-flip attempts (default: one sweep, L*L).
+    After measurement 10**6, every second configuration is stored in
+    ``state['configurations']``.
+
+    If ``file`` already exists, the simulation is continued from the stored
+    configuration. Caveats of continuing: the random number generator restarts
+    from its fixed seed, and ``configurations`` are stored from the beginning of
+    the array again (previously stored ones are overwritten).
+    """
 
     if steps_per_measurement == None:
         steps_per_measurement = length**2
@@ -135,7 +145,7 @@ if __name__ == '__main__':
 
     data.append(
         (
-            f'./data.gz',
+            './data.gz',
             temperature,
             length,
             measurements

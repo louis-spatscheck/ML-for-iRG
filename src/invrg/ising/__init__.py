@@ -2,9 +2,10 @@
 try:
     from .cising import IsingModel
 except ImportError as exc:  # extension not built
-    raise ImportError(
+    raise ModuleNotFoundError(
         "The compiled Ising simulator (invrg.ising.cising) is not available. "
-        "Install a C++ compiler and reinstall with `pip install -e .`."
+        "Install a C++ compiler and reinstall with `pip install -e .`.",
+        name="invrg.ising.cising",
     ) from exc
 
 __all__ = ["IsingModel"]
