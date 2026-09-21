@@ -11,12 +11,10 @@ from torch.utils.data import DataLoader, TensorDataset
 
 
 from invrg import autocorr
-
+from invrg.models import UNet
 
 
 from tqdm import tqdm
-
-
 
 
 betaJ = 0.44
@@ -29,9 +27,6 @@ runs = ["run_1","run_2"]
 
 alpha = np.ones(len(runs))  ### the correct values of alpha have to be chosen according to the results
 for l,run in enumerate(runs):
-
-
-
 
 
     def discretize_matrix_to_maintain_mean(matrix):
@@ -73,8 +68,6 @@ for l,run in enumerate(runs):
         print(f"The directory {path} does not exist.")
 
 
-
-
     raw_data_small= pickle.load(
     open(
             f"/data/lspatscheck/test_samples/test_data{small}.pickle",
@@ -86,169 +79,17 @@ for l,run in enumerate(runs):
     
 
 
-
-
     config_small = np.array(raw_data_small[f'L={small} configurations'])
-
-
-
 
 
     np.random.seed(55)
     config_small = np.random.permutation(config_small)[:sample_size] + 1.0
 
 
-
     print(np.mean(np.abs(np.mean(config_small - 1.0,axis=(1,2)))))
     
 
 
-    class TransposeCNN(nn.Module):  
-
-        def __init__(self): 
-            super(TransposeCNN,self).__init__()
-
-            #set of 128 convolutional layers
-            self.Tconv1 = nn.Sequential(
-                nn.ConvTranspose2d(512, 256, kernel_size=2, stride=2),
-                nn.BatchNorm2d(256),  # Batch-Normalisierungsschicht
-                #nn.Dropout2d(0.2),
-                nn.ReLU(inplace = True)  
-            )
-
-            self.Tconv2 = nn.Sequential(
-                nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2),
-                nn.BatchNorm2d(128),  # Batch-Normalisierungsschicht
-                #nn.Dropout2d(0.2),
-                nn.ReLU(inplace = True)  
-            )
-
-
-            self.Tconv3 = nn.Sequential(
-                nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2),
-                nn.BatchNorm2d(64),  # Batch-Normalisierungsschicht
-                #nn.Dropout2d(0.2),
-                nn.ReLU(inplace = True)  
-            )
-
-            self.pooling = nn.Sequential(
-                nn.MaxPool2d(2,2),
-                nn.ReLU(inplace = True) 
-            )
-
-            self.pooling2 = nn.Sequential(
-                nn.MaxPool2d(2,2),
-                nn.ReLU(inplace = True) 
-            )
-
-
-            
-
-            self.conv1 = nn.Sequential(
-                nn.Conv2d(1, 128, kernel_size=3, stride=1, padding=1,padding_mode="circular"),
-                nn.BatchNorm2d(128),  # Batch-Normalisierungsschicht
-                nn.ReLU(inplace = True)  
-            ) 
-
-            self.conv2 = nn.Sequential(
-                nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1,padding_mode="circular"),
-                nn.BatchNorm2d(256),  # Batch-Normalisierungsschicht
-                nn.ReLU(inplace = True)  
-            ) 
-
-            self.conv3 = nn.Sequential(
-                nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1,padding_mode="circular"),
-                nn.BatchNorm2d(512),  # Batch-Normalisierungsschicht
-                #nn.Dropout2d(0.5),
-                nn.ReLU(inplace = True)  
-            ) 
-
-            self.conv4 = nn.Sequential(
-                nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1,padding_mode="circular"),
-                nn.BatchNorm2d(512),  # Batch-Normalisierungsschicht
-                nn.ReLU(inplace = True)  #added ReLu
-            ) 
-
-            self.conv5 = nn.Sequential(
-                nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1,padding_mode="circular"),
-                nn.BatchNorm2d(512),  # Batch-Normalisierungsschicht
-            )
-
-            self.conv6 = nn.Sequential(
-                nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=1,padding_mode="circular"),
-                nn.BatchNorm2d(256),  # Batch-Normalisierungsschicht
-                #nn.Dropout2d(0.5),
-                nn.ReLU(inplace = True)  #added ReLu
-            )
-
-            self.conv7 = nn.Sequential(
-                nn.Conv2d(256, 128, kernel_size=3, stride=1, padding=1,padding_mode="circular"),
-                nn.BatchNorm2d(128),  # Batch-Normalisierungsschicht
-                #nn.Dropout2d(0.5),
-                nn.ReLU(inplace = True)  
-            )
-
-            self.conv8 = nn.Sequential(
-                nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1,padding_mode="circular"),
-                nn.BatchNorm2d(64),  # Batch-Normalisierungsschicht
-                #nn.Dropout2d(0.5),
-                nn.ReLU(inplace = True) 
-            )
-
-
-            self.final_conv = nn.Sequential(
-                nn.Conv2d(64, 1, kernel_size=1, stride=1,padding=0,padding_mode="circular")
-            )
-
-
-        def forward(self,x):
-
-            x = self.conv1(x)
-            
-            shortcut1 = x
-
-            x = self.pooling(x)
-
-
-            x = self.conv2(x)
-
-            shortcut2 = x
-
-            x = self.pooling2(x)
-
-
-            x = self.conv3(x)
-
-            shortcut3 = x
-
-
-            x = self.conv4(x)
-            x = self.conv5(x)
-
-            x = nn.functional.relu( x + shortcut3)
-
-
-
-            x = self.Tconv1(x)
-
-            x = torch.cat((x, shortcut2), dim=1)
-
-            x = self.conv6(x)
-
-
-            x = self.Tconv2(x)
-
-            x = torch.cat((x, shortcut1), dim=1)
-
-            x = self.conv7(x)
-
-            x = self.Tconv3(x)
-
-            x = self.conv8(x)
-
-            x = self.final_conv(x)
-            
-            return x
         
 
     for i in range(0,10):
@@ -258,7 +99,7 @@ for l,run in enumerate(runs):
             os.makedirs(nested_folder)
             print(f"Verschachtelter Ordner '{nested_folder}' wurde erstellt.")
 
-    model = TransposeCNN()
+    model = UNet()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -273,7 +114,6 @@ for l,run in enumerate(runs):
 
 
         print('Finished Training')
-
 
 
         config_small_test = config_small
@@ -301,7 +141,6 @@ for l,run in enumerate(runs):
 
         with torch.no_grad():
             for k in tqdm(range(len(config_small_test)), desc="Verarbeitung"):
-
 
 
                 input_tensor = torch.tensor(config_small_test[k], dtype=torch.float32)
@@ -481,7 +320,6 @@ for l,run in enumerate(runs):
                 pass
 
 
-
                     
                 
 
@@ -539,16 +377,6 @@ for l,run in enumerate(runs):
         mags7 = dict( output = mag7, rounded_output = mag7_round)
 
 
-
-
-
-
-
-
-
-
-
-
         pickle.dump(
             mags1,
             open(
@@ -596,7 +424,6 @@ for l,run in enumerate(runs):
                 mode = 'wb'
             )
         )
-
 
 
         pickle.dump(

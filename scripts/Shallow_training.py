@@ -11,6 +11,8 @@ from torch.utils.data import DataLoader, TensorDataset
 import argparse
 import torch
 
+from invrg.models import ShallowCNN
+
 #the paths to load data and models, aswell as save models and losses have to be added
 
 path = '/tikhome/lspatscheck/Documents/bsc/simulation_data/final_training/bigger/no_drop'  #path to the training data
@@ -56,9 +58,6 @@ config32_val = config32[-val_data_size:]
 config16_val = config16[-val_data_size:]
 
 
-
-
-
 val_combined_dataset = TensorDataset(
     torch.tensor(config32_val, dtype=torch.float32).unsqueeze(1),  # original val_data
     torch.tensor(config16_val, dtype=torch.float32).unsqueeze(1)   # input val_data
@@ -78,41 +77,13 @@ val_loader = DataLoader(val_combined_dataset, batch_size=1, shuffle = False)
 
 num_batches = len(combined_loader) 
 
-#Define the TransposedConvolutionCNN
-class TransposeCNN(nn.Module):  
-
-    def __init__(self): 
-        super(TransposeCNN,self).__init__()
-
-        self.Tconv = nn.Sequential(
-            nn.ConvTranspose2d(1, 128, kernel_size=2, stride=2),
-            nn.BatchNorm2d(128),  # Batch-Normalisierungsschicht
-            #nn.Dropout2d(0.2),
-            nn.ReLU(inplace = True)  
-        )
-
-
-        self.final_conv = nn.Sequential(
-            nn.Conv2d(128, 1, kernel_size=3, stride=1, padding=1,padding_mode="circular")
-        )
-
-
-    def forward(self,x):
-
-        x = self.Tconv(x)
-        x = self.final_conv(x)
-
-        return x
-
-
-
 
 repeat = 0
 total_repeats = 10
 
 while repeat < total_repeats:
 
-    model = TransposeCNN()
+    model = ShallowCNN()
 
     #define the loss function
     criterion = nn.MSELoss()
@@ -125,8 +96,6 @@ while repeat < total_repeats:
     print("Start Training")
 
 
-
-
     train_time = 10
     training = 0
 
@@ -137,8 +106,6 @@ while repeat < total_repeats:
 
             model.load_state_dict(torch.load(f"{path}/run_{repeat}/models/model_{training-1}.pth",map_location=device))
             model.to(device)
-
-
 
 
         epochs = 100
@@ -169,7 +136,6 @@ while repeat < total_repeats:
 
                 # forward + backward + optimize
                 outputs = model(inputs)
-
 
 
                 loss = criterion(outputs, originals)
@@ -203,15 +169,12 @@ while repeat < total_repeats:
                         mean_outputs = torch.mean(val_outputs-1.0)
 
 
-
                         mag_loss += float(torch.abs(mean_originals) - torch.abs(mean_outputs))
      
                         
                         
 
                       
-
-
 
 
             if epoch % 10 == 0:
@@ -227,8 +190,6 @@ while repeat < total_repeats:
                 print(f"Epoch {epoch+1}/{epochs}, Training Loss: {losses[epoch]}, Validation Loss: {val_losses[epoch]}, Mean mag: {mag_losses[-1]}")
 
 
-
-
         # Plot the loss function
         plt.figure()
         plt.plot(losses,label = "loss")
@@ -239,12 +200,6 @@ while repeat < total_repeats:
         plt.yscale('log')  # Set y-axis to logarithmic scale
         plt.legend()
         plt.savefig(f"{path}/run_{repeat}/losses_plot/training_loss_{training}.png")
-
-
-
-
-
-
 
 
         pickle.dump(
@@ -272,7 +227,6 @@ while repeat < total_repeats:
         )
 
 
-
         print('Finished Training')
 
 
@@ -280,12 +234,10 @@ while repeat < total_repeats:
         torch.save(model.state_dict(), f"{path}/run_{repeat}/models/model_{training}.pth")
 
 
-
         correct = 0
         total = 0
         with torch.no_grad():
             for i in [0,val_data_size//2 -1,val_data_size - 1]:
-
 
 
                 original_tensor = torch.tensor(config32_val[i], dtype=torch.float32)
@@ -300,11 +252,9 @@ while repeat < total_repeats:
                 outputs = model(inputs)
 
 
-
                 origin = originals.cpu().squeeze().numpy()
                 out = outputs.cpu().squeeze().numpy()
                 inp = inputs.cpu().squeeze().numpy()
-
 
 
                 # Finde den maximalen und minimalen Wert in beiden Bildern
@@ -400,7 +350,6 @@ while repeat < total_repeats:
                 plt.savefig(f'{path}/run_{repeat}/pictures/pictures_train_{training}_{i}.png')
 
                 plt.close('all')
-
 
 
         training += 1
