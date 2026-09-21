@@ -19,9 +19,9 @@ template <typename T> T mod(T a, T b) {
 class Ising {
 public:
   // Constructor
-  Ising(double beta, int length) {
+  Ising(double beta, int length, unsigned int seed = 42) {
     // Seed the random number generator
-    m_rng.seed(42);
+    m_rng.seed(seed);
 
     // Store parameters
     m_beta = beta;

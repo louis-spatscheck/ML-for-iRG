@@ -50,3 +50,14 @@ def test_continue_simulation_from_file(tmp_path):
     simulation.run_simulation(file, 1 / 0.44, 8, 200)
     _, state = simulation.read_state(file)
     assert len(state["energies"]) == 500
+
+
+def test_seed_argument():
+    def run(**kwargs):
+        model = IsingModel(0.44, 8, **kwargs)
+        model.try_many_random_flips(2000)
+        return model.as_numpy()
+
+    assert np.array_equal(run(), run(seed=42))       # 42 is the default (results of earlier versions stay valid)
+    assert np.array_equal(run(seed=3), run(seed=3))
+    assert not np.array_equal(run(seed=3), run(seed=4))
