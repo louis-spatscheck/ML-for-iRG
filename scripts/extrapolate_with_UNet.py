@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 
 from invrg import autocorr
+from invrg.paths import DATA_DIR, SCRATCH_DIR
 from invrg.models import UNet
 
 
@@ -59,8 +60,8 @@ for l,run in enumerate(runs):
 
 ############# the paths to the models and data of L=16 and L=32 simulations have to be define by yourself
 
-    model_directory = f"/tikhome/lspatscheck/Documents/bsc/simulation_data/final_models/complex_UNet_20000/{run}/models/model_17.pth"
-    path = f"/data/lspatscheck/complexUNet2000/{run}/test" 
+    model_directory = f"{DATA_DIR}/final_models/complex_UNet_20000/{run}/models/model_17.pth"
+    path = f"{SCRATCH_DIR}/complexUNet2000/{run}/test" 
 
     if os.path.isdir(path):
         print(f"The directory {path} exists.")
@@ -70,7 +71,7 @@ for l,run in enumerate(runs):
 
     raw_data_small= pickle.load(
     open(
-            f"/data/lspatscheck/test_samples/test_data{small}.pickle",
+            f"{SCRATCH_DIR}/test_samples/test_data{small}.pickle",
         'rb'
         )
     )
@@ -97,7 +98,7 @@ for l,run in enumerate(runs):
 
         if not os.path.exists(nested_folder):
             os.makedirs(nested_folder)
-            print(f"Verschachtelter Ordner '{nested_folder}' wurde erstellt.")
+            print(f"Created nested folder '{nested_folder}'.")
 
     model = UNet()
 
@@ -140,7 +141,7 @@ for l,run in enumerate(runs):
         #mag8_round = np.empty(sample_size,dtype= np.float32)
 
         with torch.no_grad():
-            for k in tqdm(range(len(config_small_test)), desc="Verarbeitung"):
+            for k in tqdm(range(len(config_small_test)), desc="Processing"):
 
 
                 input_tensor = torch.tensor(config_small_test[k], dtype=torch.float32)
@@ -176,10 +177,10 @@ for l,run in enumerate(runs):
                 
 
 
-                # Bestimme das Vorzeichen jedes Elements
+                # Determine the sign of each element
                 #signs = torch.sign(outputs)
 
-        # Setze die positiven Werte auf 1 und die negativen Werte auf -1
+        # Set the positive values to 1 and the negative values to -1
                 #outputs = torch.where(signs > 0, torch.tensor(1.0), torch.tensor(-1.0))
 
 
@@ -230,19 +231,19 @@ for l,run in enumerate(runs):
                     min_val = -1.0
                     max_val = 1.0
                     
-                    #Erstelle einen neuen Plot
+                    #Create a new plot
                     plt.figure(figsize=(80,30))
 
                     plt.subplot(1, 17, 1)
                     plt.imshow(inp, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Input')
 
-                    # Plotte das Vorhersagebild auf der rechten Seite
+                    # Plot the predicted image on the right
                     plt.subplot(1, 17, 2)
                     plt.imshow(out1, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Continues Output')
 
-                    # Plotte das Vorhersagebild auf der rechten Seite
+                    # Plot the predicted image on the right
                     plt.subplot(1, 17, 3)
                     plt.imshow(round_out1, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Discrete Output')
@@ -251,7 +252,7 @@ for l,run in enumerate(runs):
                     plt.imshow(out2, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Continues Output')
 
-                    # Plotte das Vorhersagebild auf der rechten Seite
+                    # Plot the predicted image on the right
                     plt.subplot(1, 17, 5)
                     plt.imshow(round_out2, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Discrete Output')
@@ -261,7 +262,7 @@ for l,run in enumerate(runs):
                     plt.imshow(out3, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Continues Output')
 
-                    # Plotte das Vorhersagebild auf der rechten Seite
+                    # Plot the predicted image on the right
                     plt.subplot(1, 17, 7)
                     plt.imshow(round_out3, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Discrete Output')
@@ -271,7 +272,7 @@ for l,run in enumerate(runs):
                     plt.imshow(out4, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Continues Output')
 
-                    # Plotte das Vorhersagebild auf der rechten Seite
+                    # Plot the predicted image on the right
                     plt.subplot(1, 17, 9)
                     plt.imshow(round_out4, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Discrete Output')
@@ -280,7 +281,7 @@ for l,run in enumerate(runs):
                     plt.imshow(out5, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Continues Output')
 
-                    # Plotte das Vorhersagebild auf der rechten Seite
+                    # Plot the predicted image on the right
                     plt.subplot(1, 17, 11)
                     plt.imshow(round_out5, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Discrete Output')
@@ -290,7 +291,7 @@ for l,run in enumerate(runs):
                     plt.imshow(out6, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Continues Output')
 
-                    # Plotte das Vorhersagebild auf der rechten Seite
+                    # Plot the predicted image on the right
                     plt.subplot(1, 17, 13)
                     plt.imshow(round_out6, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Discrete Output')
@@ -299,7 +300,7 @@ for l,run in enumerate(runs):
                     plt.imshow(out7, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Continues Output')
 
-                    # Plotte das Vorhersagebild auf der rechten Seite
+                    # Plot the predicted image on the right
                     plt.subplot(1, 17, 15)
                     plt.imshow(round_out7, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Discrete Output')
@@ -308,13 +309,13 @@ for l,run in enumerate(runs):
                     plt.imshow(out5, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Continues Output')
 
-                    #Plotte das Vorhersagebild auf der rechten Seite
+                    #Plot the predicted image on the right
                     plt.subplot(1, 17, 17)
                     plt.imshow(round_out5, cmap='gray', vmin=min_val, vmax=max_val)
                     plt.title('Discrete Output')
 
 
-                    # Zeige den Plot an
+                    # Show the plot
                     plt.savefig(f"{path}/{small}_{big}/picture_{k}")
                     #plt.show()
                 pass
@@ -325,7 +326,7 @@ for l,run in enumerate(runs):
 
         L32_result = pickle.load(
             open(
-            f'/data/lspatscheck/test_samples/test_data32.pickle',
+            f'{SCRATCH_DIR}/test_samples/test_data32.pickle',
             mode = 'rb'
             )
         )
@@ -334,7 +335,7 @@ for l,run in enumerate(runs):
 
         mean_mag_original,err_mag_original,_ =  autocorr.calc_error(np.abs(mag32))
 
-        # Erstelle ein Dictionary, um die Ergebnisse zu speichern
+        # Create a dictionary to store the results
         mean_mag_output = {}
         err_mag_output = {}
 
@@ -348,7 +349,7 @@ for l,run in enumerate(runs):
         for i,data in enumerate([mag1_round,mag2_round,mag3_round,mag4_round,mag5_round,mag6_round,mag7_round]):
             print(np.mean(data))
             mean_mag_round_output[i+1],err_mag_round_output[i+1],_ =  autocorr.calc_error(np.abs(data))
-        # Zugriff auf die Ergebnisse
+        # Access the results
 
 
         print( " Mean mag error:", (mean_mag_original - mean_mag_output[1])/mean_mag_original )

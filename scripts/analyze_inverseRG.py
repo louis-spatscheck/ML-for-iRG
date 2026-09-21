@@ -6,6 +6,8 @@ import numpy as np
 import scipy.interpolate as spip
 
 from invrg import autocorr
+from invrg.constants import BETA_C_EXACT, BETA_C_INVERSE
+from invrg.paths import DATA_DIR, PLOTS_DIR, SCRATCH_DIR, out_path
 
 
 def analysis():
@@ -13,7 +15,7 @@ def analysis():
     length = 16
     betaJ = 0.44
     time_to_equilibrium = int(3e5)
-    path_model = '/data/lspatscheck/complexUNet20000/run_10/test'
+    path_model = f'{SCRATCH_DIR}/complexUNet20000/run_10/test'
 
     def mag_re(m_beta0,e_beta0,beta0,beta):
         m_re = np.empty_like(beta)
@@ -24,7 +26,7 @@ def analysis():
     
     L16re_result = pickle.load(
         open(
-        f'/data/lspatscheck/test_samples/test_data16.pickle',
+        f'{SCRATCH_DIR}/test_samples/test_data16.pickle',
         mode = 'rb'
         )
     )
@@ -45,7 +47,7 @@ def analysis():
 
     L16_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size16/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size16/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -60,7 +62,7 @@ def analysis():
 
     L32_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size32/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size32/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -76,7 +78,7 @@ def analysis():
 
     L64_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size64/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size64/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -91,7 +93,7 @@ def analysis():
     print("Done")
     L128_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size128/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size128/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -104,7 +106,7 @@ def analysis():
     
     L256_result = pickle.load(
         open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size256/betaJ{betaJ}/final_result/simple_data_2e6.pickle',
+        f'{DATA_DIR}/lattice_size256/betaJ{betaJ}/final_result/simple_data_2e6.pickle',
         mode = 'rb'
         )
     )
@@ -118,7 +120,7 @@ def analysis():
     """    
     L256_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size256/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size256/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -132,7 +134,7 @@ def analysis():
 
     L512_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size512/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size512/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -176,7 +178,7 @@ def analysis():
     mag_error = [magnetization_error_L256,magnetization_error_L128,magnetization_error_L64,magnetization_error_L32,magnetization_error_L16]
     mag_mean = [magnetization_mean_L256,magnetization_mean_L128,magnetization_mean_L64,magnetization_mean_L32,magnetization_mean_L16]
 
-    path_models = ['/data/lspatscheck/complexUNet2000/run_10/test','/data/lspatscheck/complexUNet2000/run_11/test','/data/lspatscheck/complexUNet2000/run_12/test','/data/lspatscheck/complexUNet2000/run_15/test','/data/lspatscheck/complexUNet2000/run_16/test','/data/lspatscheck/complexUNet2000/run_17/test','/data/lspatscheck/complexUNet2000/run_18/test','/data/lspatscheck/complexUNet2000/run_19/test','/data/lspatscheck/complexUNet2000/run_20/test']
+    path_models = [f'{SCRATCH_DIR}/complexUNet2000/run_10/test',f'{SCRATCH_DIR}/complexUNet2000/run_11/test',f'{SCRATCH_DIR}/complexUNet2000/run_12/test',f'{SCRATCH_DIR}/complexUNet2000/run_15/test',f'{SCRATCH_DIR}/complexUNet2000/run_16/test',f'{SCRATCH_DIR}/complexUNet2000/run_17/test',f'{SCRATCH_DIR}/complexUNet2000/run_18/test',f'{SCRATCH_DIR}/complexUNet2000/run_19/test',f'{SCRATCH_DIR}/complexUNet2000/run_20/test']
 
     # Function to load data and calculate magnetization and errors
     def load_and_process_data(path_model):
@@ -216,8 +218,7 @@ def analysis():
         mag16 = mag[-1]  # Assuming the smallest size is at the end
         dmag16 =  spip.interp1d(beta,np.gradient(mag16,beta))
         mag16 = spip.interp1d(beta,mag16)
-        beta_c = 0.5 * np.log(1 + np.sqrt(2)) 
-        beta_c = 0.4404728
+        beta_c = BETA_C_INVERSE
 
         mag_interp = {size: spip.interp1d(beta, mag_reweights[i]) for i, size in enumerate([2048,1024, 512, 256, 128, 64, 32])}
         mag_interp[16] = mag16
@@ -273,7 +274,7 @@ def analysis():
     pickle.dump(
     data,
     open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/inverse_renorm/beta_crits.pickle',
+        out_path(f'{DATA_DIR}/inverse_renorm/beta_crits.pickle'),
         mode = 'wb'
         )
     )
@@ -315,7 +316,7 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/test_inverse_complex_UNet/inverse_crits_abs.png', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/test_inverse_complex_UNet/inverse_crits_abs.png'), dpi=300, bbox_inches='tight')
     plt.show()
 
     fig, ax = plt.subplots(1, 3, figsize=(18, 6))
@@ -354,21 +355,21 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/test_inverse_complex_UNet/inverse_crits_rela.png', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/test_inverse_complex_UNet/inverse_crits_rela.png'), dpi=300, bbox_inches='tight')
     plt.show()
 
     stacked_data1 = np.vstack( (all_data1[1], all_data1[2]))
-    # Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+    # Compute the mean at every time step (along the first axis)
     mean_data1 = np.mean(stacked_data1, axis=0)
     err1 = np.std(stacked_data1,axis= 0)/ np.sqrt(3)
 
     stacked_data2 = np.vstack( (all_data2[1], all_data2[2]))
-    # Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+    # Compute the mean at every time step (along the first axis)
     mean_data2= np.mean(stacked_data2, axis=0)
     err2 = np.std(stacked_data2,axis= 0)/ np.sqrt(3)
 
     stacked_data3 = np.vstack( (all_data3[1], all_data3[2]))
-    # Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+    # Compute the mean at every time step (along the first axis)
     mean_data3 = np.mean(stacked_data3, axis=0)
     err3= np.std(stacked_data3,axis= 0)/ np.sqrt(3)
 
@@ -404,60 +405,60 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/test_inverse_complex_UNet/inverse_crits_rela_mean_corr.png', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/test_inverse_complex_UNet/inverse_crits_rela_mean_corr.png'), dpi=300, bbox_inches='tight')
     plt.show()
     """
 
 
     L = [256,128,64,32]
-# Einstellungen für einheitliche Schriftarten
+# Use consistent fonts
     plt.rcParams.update({'font.size': 24, 'font.family': 'serif'})
 
-    # Plotten
+    # Plot
 
 
     for i in range(len(L)):
         fig, ax = plt.subplots(figsize=(12, 8))
 
         stacked_mag = np.vstack(( all_magres[0][i+3],all_magres[1][i+3], all_magres[2][i+3],all_magres[3][i+3],all_magres[4][i+3], all_magres[5][i+3],all_magres[7][i+3],all_magres[8][i+3]))
-        # Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+        # Compute the mean at every time step (along the first axis)
         mean_mag = np.mean(stacked_mag, axis=0)
         err= np.std(stacked_mag,axis= 0)/ np.sqrt(9)
 
 
-        # Originale Magnetisierung mit Fehlerbalken
+        # Original magnetization with error band
         ax.plot(beta, mag[i], "r-", label=f"L={L[i]}", linewidth=2)
         ax.fill_between(beta, mag[i] - mag_error[i], mag[i] + mag_error[i], color='r', alpha=0.2)
 
-        # Renormierte Magnetisierung mit Fehlerbalken
+        # Renormalized magnetization with error band
         ax.plot(beta, mean_mag, "b-.", label=f"L'={L[i]}", linewidth=2)
         
         ax.fill_between(beta, mean_mag + err , mean_mag - err , color='g', alpha=0.8)
         ax.fill_between(beta, mean_mag + np.mean(all_magre_errors[:][i+3]) , mean_mag - np.mean(all_magre_errors[:][i+3]) , color='b', alpha=0.2)
 
-        # Achsenbeschriftungen und Titel
+        # Axis labels and title
         ax.set_xlabel('$\\beta$', fontsize=28)
         ax.set_ylabel('$\\langle \\left|m \\right| \\rangle$', fontsize=28)
         #ax.set_title(f'Reweighted Magnetization', fontsize=20, pad=20)
 
-        # Legende
+        # Legend
         ax.legend(fontsize=28)
 
         plt.xticks([0.4400,0.4406,0.4410], ["$0.4400$","$0.4406$","$0.4410$"], fontsize=24)
-        # Achsenskalierung verbessern
+        # Improve axis scaling
         ax.set_xlim([0.4400, 0.4410])
         print([min([m.min() for m in mag[i] ]), max([m.max() for m in mag[i] ]) ])
 
         ax.set_ylim([min([m.min() for m in mag[i]-0.002 ]), max([m.max() for m in mag[i]+0.002 ]) ])
 
         #ax.set_ylim([0.50,0.75 ])
-        # Layout verbessern
+        # Improve layout
         plt.tight_layout()
 
-        # Speichern der Abbildung
-        plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/test_inverse_complex_UNet/inverse_group_flow_UNet20000_{L[i]}.pdf', dpi=300, bbox_inches='tight')
+        # Save the figure
+        plt.savefig(out_path(f'{PLOTS_DIR}/test_inverse_complex_UNet/inverse_group_flow_UNet20000_{L[i]}.pdf'), dpi=300, bbox_inches='tight')
 
-        # Zeigen der Abbildung
+        # Show the figure
         plt.show()
     """
 
@@ -470,7 +471,7 @@ def analysis():
     dmag32re = spip.interp1d(beta,mag32re)
     dmag16re = spip.interp1d(beta,mag16re)
 
-    beta_c = 0.5 * np.log(1 + np.sqrt(2)) 
+    beta_c = BETA_C_EXACT
 
 
     crit_renorm16_32 = -np.log(dmag32re(beta_c)/dmag16(beta_c)) /(np.log(2)*(1))
@@ -536,7 +537,7 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    ##plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/forward_crits_rela.pdf', dpi=300, bbox_inches='tight')
+    ##plt.savefig(out_path(f'{PLOTS_DIR}/forward_crits_rela.pdf'), dpi=300, bbox_inches='tight')
     plt.show()
 
     # Create figures with error bars
@@ -567,47 +568,47 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    ##plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/forward_crits_abs.pdf', dpi=300, bbox_inches='tight')
+    ##plt.savefig(out_path(f'{PLOTS_DIR}/forward_crits_abs.pdf'), dpi=300, bbox_inches='tight')
     plt.show()
 
     L = [512,256,128,64,32]
-# Einstellungen für einheitliche Schriftarten
+# Use consistent fonts
     plt.rcParams.update({'font.size': 14, 'font.family': 'serif'})
 
-    # Plotten
+    # Plot
     for i in range(len(L)):
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Originale Magnetisierung mit Fehlerbalken
+        # Original magnetization with error band
         ax.plot(beta, mag[i], "r-", label=f"L={L[i]}", linewidth=2)
         ax.fill_between(beta, mag[i] - mag_error[i], mag[i] + mag_error[i], color='r', alpha=0.2)
 
-        # Renormierte Magnetisierung mit Fehlerbalken
+        # Renormalized magnetization with error band
         ax.plot(beta, magre[i], "b-.", label=f"L'={L[i]}", linewidth=2)
         ax.fill_between(beta, magre[i] - magre_error[i], magre[i] + magre_error[i], color='b', alpha=0.2)
 
-        # Achsenbeschriftungen und Titel
+        # Axis labels and title
         ax.set_xlabel(r'$\beta$', fontsize=16)
         ax.set_ylabel(r'$|m|$', fontsize=16)
         ax.set_title(f'Reweighted Magnetization at $\\beta_c = {betaJ}$', fontsize=18, pad=20)
 
-        # Legende
+        # Legend
         ax.legend(fontsize=14)
 
-        # Raster hinzufügen
+        # Add grid
         ax.grid(True, linestyle='--', alpha=0.5)
 
-        # Achsenskalierung verbessern
+        # Improve axis scaling
         ax.set_xlim([beta.min(), beta.max()])
         ax.set_ylim([min([m.min() for m in mag + magre]) - 0.02, max([m.max() for m in mag + magre]) + 0.02])
 
-        # Layout verbessern
+        # Improve layout
         plt.tight_layout()
 
-        # Speichern der Abbildung
-        #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/group_flow_{i}.pdf', dpi=300, bbox_inches='tight')
+        # Save the figure
+        #plt.savefig(out_path(f'{PLOTS_DIR}/group_flow_{i}.pdf'), dpi=300, bbox_inches='tight')
 
-        # Zeigen der Abbildung
+        # Show the figure
         plt.show()
     
     """
@@ -670,8 +671,7 @@ def analysis():
         crit_renorms = []
         mag16 = susz16  # Assuming the smallest size is at the end
         dmag16 =  spip.interp1d(beta,np.gradient(mag16,beta))
-        beta_c = 0.5 * np.log(1 + np.sqrt(2)) 
-        beta_c = 0.4404728
+        beta_c = BETA_C_INVERSE
 
         mag_interp = {size: spip.interp1d(beta, np.gradient(susz_reweights[i],beta)) for i, size in enumerate([2048,1024, 512, 256, 128, 64, 32])}
         mag_interp[16] = dmag16
@@ -715,7 +715,7 @@ def analysis():
     pickle.dump(
     data,
     open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/inverse_renorm/gamma_crits.pickle',
+        out_path(f'{DATA_DIR}/inverse_renorm/gamma_crits.pickle'),
         mode = 'wb'
         )
     )
@@ -756,7 +756,7 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/test_inverse_complex_UNet/inverse_crits_susz_abs.pdf', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/test_inverse_complex_UNet/inverse_crits_susz_abs.pdf'), dpi=300, bbox_inches='tight')
     plt.show()
 
     fig, ax = plt.subplots(1, 3, figsize=(18, 6))
@@ -795,25 +795,25 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/test_inverse_complex_UNet/inverse_crits_susz_rela.pdf', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/test_inverse_complex_UNet/inverse_crits_susz_rela.pdf'), dpi=300, bbox_inches='tight')
     plt.show()
 
     fig, ax = plt.subplots(1, 3, figsize=(18, 6))
 
     stacked_data1 = np.vstack( (all_data1[1], all_data1[2]))
-    # Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+    # Compute the mean at every time step (along the first axis)
     mean_data1 = np.mean(stacked_data1, axis=0)
     err1 = np.std(stacked_data1,axis= 0)/ np.sqrt(3)
     print(err1)
 
     stacked_data2 = np.vstack((all_data2[1], all_data2[2]))
-    # Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+    # Compute the mean at every time step (along the first axis)
     mean_data2 = np.mean(stacked_data2, axis=0)
     err2 = np.std(stacked_data2,axis= 0)/ np.sqrt(3)
     print(err2)
 
     stacked_data3 = np.vstack(( all_data3[1], all_data3[2]))
-    # Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+    # Compute the mean at every time step (along the first axis)
     mean_data3 = np.mean(stacked_data3, axis=0)
     err3= np.std(stacked_data3,axis= 0)/ np.sqrt(3)
     print(err3)
@@ -851,49 +851,49 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/test_inverse_complex_UNet/inverse_crits_susz_rela_mean_corr.pdf', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/test_inverse_complex_UNet/inverse_crits_susz_rela_mean_corr.pdf'), dpi=300, bbox_inches='tight')
     plt.show()
     """
 
     L = [128,64,32]
-# Einstellungen für einheitliche Schriftarten
+# Use consistent fonts
     plt.rcParams.update({'font.size': 14, 'font.family': 'serif'})
 
-    # Plotten
+    # Plot
     for i in range(len(L)):
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Originale Magnetisierung mit Fehlerbalken
+        # Original magnetization with error band
         ax.plot(beta, susz[i], "r-", label=f"L={L[i]}", linewidth=2)
         ax.fill_between(beta, susz[i] - susz_error[i], susz[i] + susz_error[i], color='r', alpha=0.2)
 
-        # Renormierte Magnetisierung mit Fehlerbalken
+        # Renormalized magnetization with error band
         ax.plot(beta, all_suszre[18+i], "b-.", label=f"L'={L[i]}", linewidth=2)
         
         ax.fill_between(beta, all_suszre[4+i] , all_suszre[11+i] , color='b', alpha=0.2)
 
-        # Achsenbeschriftungen und Titel
+        # Axis labels and title
         ax.set_xlabel(r'$\beta$', fontsize=20)
         ax.set_ylabel(r'$|\chi|$', fontsize=20)
-        ax.set_title(f'Reweighted Suszeptibility at $\\beta_c = {betaJ}$', fontsize=18, pad=20)
+        ax.set_title(f'Reweighted Susceptibility at $\\beta_c = {betaJ}$', fontsize=18, pad=20)
 
-        # Legende
+        # Legend
         ax.legend(fontsize=14)
 
-        # Raster hinzufügen
+        # Add grid
         ax.grid(True, linestyle='--', alpha=0.5)
 
-        # Achsenskalierung verbessern
+        # Improve axis scaling
         ax.set_xlim([beta.min(), beta.max()])
         #ax.set_ylim([min([m.min() for m in mag + magre]) - 0.02, max([m.max() for m in mag + magre]) + 0.02])
 
-        # Layout verbessern
+        # Improve layout
         plt.tight_layout()
 
-        # Speichern der Abbildung
-        #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/test_inverse_complex_UNet/inverse_group_flow_UNet20000_susz_{i}.pdf', dpi=300, bbox_inches='tight')
+        # Save the figure
+        #plt.savefig(out_path(f'{PLOTS_DIR}/test_inverse_complex_UNet/inverse_group_flow_UNet20000_susz_{i}.pdf'), dpi=300, bbox_inches='tight')
 
-        # Zeigen der Abbildung
+        # Show the figure
         plt.show()
     """
 
@@ -903,7 +903,7 @@ def analysis():
     dsusz32re = spip.interp1d(beta,susz32re)
     dsusz16re = spip.interp1d(beta,susz16re)
 
-    beta_c = 0.5 * np.log(1 + np.sqrt(2)) 
+    beta_c = BETA_C_EXACT
 
     crit_renorm128_64 = np.log(dsusz64re(beta_c)/dsusz128(0.440436)) /(np.log(2)*(-1))
     crit_renorm128_32 = np.log(dsusz32re(beta_c)/dsusz128(0.44051)) /(np.log(2)*(-2))
@@ -987,7 +987,7 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/forward_crits_susz_rela.pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(out_path(f'{PLOTS_DIR}/forward_crits_susz_rela.pdf'), dpi=300, bbox_inches='tight')
     plt.show()
 
     # Create figures with error bars
@@ -1018,46 +1018,46 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/forward_crits_susz_abs.pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(out_path(f'{PLOTS_DIR}/forward_crits_susz_abs.pdf'), dpi=300, bbox_inches='tight')
     plt.show()
 
-# Einstellungen für einheitliche Schriftarten
+# Use consistent fonts
     plt.rcParams.update({'font.size': 14, 'font.family': 'serif'})
 
-    # Plotten
+    # Plot
     for i in range(len(L)):
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Originale Magnetisierung mit Fehlerbalken
+        # Original magnetization with error band
         ax.plot(beta, susz[i], "r-", label=f"L={L[i]}", linewidth=2)
         ax.fill_between(beta, susz[i] - susz_error[i], susz[i] + susz_error[i], color='r', alpha=0.2)
 
-        # Renormierte Magnetisierung mit Fehlerbalken
+        # Renormalized magnetization with error band
         ax.plot(beta, suszre[i], "b-.", label=f"L'={L[i]}", linewidth=2)
         ax.fill_between(beta, suszre[i] - suszre_error[i], suszre[i] + suszre_error[i], color='b', alpha=0.2)
 
-        # Achsenbeschriftungen und Titel
+        # Axis labels and title
         ax.set_xlabel(r'$\beta$', fontsize=16)
         ax.set_ylabel(r'$\chi$', fontsize=16)
-        ax.set_title(f'Reweighted Suszeptibility at $\\beta_c = {betaJ}$', fontsize=18, pad=20)
+        ax.set_title(f'Reweighted Susceptibility at $\\beta_c = {betaJ}$', fontsize=18, pad=20)
 
-        # Legende
+        # Legend
         ax.legend(fontsize=14)
 
-        # Raster hinzufügen
+        # Add grid
         ax.grid(True, linestyle='--', alpha=0.5)
 
-        # Achsenskalierung verbessern
+        # Improve axis scaling
         ax.set_xlim([beta.min(), beta.max()])
         ax.set_ylim([min([m.min() for m in susz + suszre]) - 0.02, max([m.max() for m in susz + suszre]) + 0.02])
 
-        # Layout verbessern
+        # Improve layout
         plt.tight_layout()
 
-        # Speichern der Abbildung
-        plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/group_flow_{i}_susz.pdf', dpi=300, bbox_inches='tight')
+        # Save the figure
+        plt.savefig(out_path(f'{PLOTS_DIR}/group_flow_{i}_susz.pdf'), dpi=300, bbox_inches='tight')
 
-        # Zeigen der Abbildung
+        # Show the figure
         plt.show()
 
 """
