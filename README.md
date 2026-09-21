@@ -26,6 +26,7 @@ src/invrg/            installable package
     constants.py      critical values (beta_c, exponents)
     paths.py          data / scratch / plot directories
 scripts/              command-line tools and analysis scripts
+examples/             worked example notebook of the whole workflow
 condor/               HTCondor job files for the cluster
 tests/                pytest suite
 ```
@@ -36,12 +37,16 @@ tests/                pytest suite
 pip install -e .              # core package (+ C++ simulator if a compiler is available)
 pip install -e ".[ml]"        # additionally install PyTorch (models, training)
 pip install -e ".[ml,test]"   # ... and pytest
+pip install -e ".[ml,examples]"  # ... and JupyterLab for the notebook in examples/
 ```
 
 The C++ simulator needs a C++ compiler. Without one the installation still
 succeeds, but `invrg.ising` and `invrg.simulation` are unavailable.
 
 ## Workflow
+
+A guided, runnable walk-through of all steps below is in
+[`examples/inverse_rg_workflow.ipynb`](examples/inverse_rg_workflow.ipynb).
 
 1. **Simulate** the Ising model (writes `data.gz` into the current directory):
    ```bash

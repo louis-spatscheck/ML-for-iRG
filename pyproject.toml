@@ -20,7 +20,8 @@ dependencies = [
 [project.optional-dependencies]
 # Needed for invrg.models and the training / extrapolation scripts.
 ml = ["torch"]
-test = ["pytest"]
+test = ["pytest", "nbformat", "nbclient", "ipykernel"]
+examples = ["jupyterlab"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
