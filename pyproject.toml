@@ -20,6 +20,10 @@ dependencies = [
 [project.optional-dependencies]
 # Needed for invrg.models and the training / extrapolation scripts.
 ml = ["torch"]
+test = ["pytest"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
