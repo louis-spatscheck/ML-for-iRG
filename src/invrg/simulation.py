@@ -1,5 +1,5 @@
 import scipy.constants
-import cising
+from invrg.ising import cising
 import numpy as np
 import os.path
 import pickle

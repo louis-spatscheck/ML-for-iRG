@@ -10,7 +10,7 @@ import time
 from torch.utils.data import DataLoader, TensorDataset
 
 
-import autocorr  # from this repository
+from invrg import autocorr
 
 
 

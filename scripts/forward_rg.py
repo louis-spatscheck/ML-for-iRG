@@ -1,71 +1,17 @@
-import numpy as np
-import pickle
+"""Forward RG driver: majority-rule renormalization of L=128 Ising configurations.
+
+Reads the simulated configurations, applies the majority rule repeatedly
+(128 -> 64 -> 32 -> ... -> 4) and stores every level as a pickle file.
+"""
 import gzip
-import pandas as pd
-import matplotlib.pyplot as plt
-import scipy.interpolate as spip
-import scipy.optimize as spopt
-import autocorr
-#import analysis_autocorr
-import argparse
-import scipy
+import pickle
 
-
-
-
-import numpy as np
-import time
-from tqdm import tqdm
-
-def majority_rule(configs, L):
-    """
-    Wendet die Mehrheitsregel auf eine Liste von Ising-Konfigurationen an.
-    
-    Parameter:
-        configs (list): Die Liste der Ising-Konfigurationen als 3D-Arrays (num, L, L).
-        
-    Rückgabewert:
-        new_configs (list): Die Liste der renormierten Ising-Konfigurationen als 3D-Arrays (num, L//2, L//2).
-    """
-    start_time = time.time()
-    num_configs = len(configs)
-    new_configs = np.empty((num_configs, L//2, L//2))
-    
-    # Split the configurations into 2x2 blocks and sum over the blocks
-    configs = np.array(configs)
-    
-    for n in tqdm(range(num_configs), desc="Processing configurations"):
-        config = configs[n]
-        subgrids = config.reshape(L//2, 2, L//2, 2).sum(axis=(1, 3))
-        
-        # Apply the majority rule and handle zero sums
-        spins = np.sign(subgrids)
-        zero_spins = (spins == 0)
-        spins[zero_spins] = np.random.choice([-1, 1], size=zero_spins.sum())
-        
-        new_configs[n] = spins
-    
-    end_time = time.time()
-    print(f"Processing time: {end_time - start_time:.2f} seconds")
-    
-    return new_configs
-
-
-
-def calc_magnetization(configs):
-    magnetization = np.empty(len(configs))
-    n = 0
-    for config in configs:
-        magnetization[n] = np.abs(np.sum(config))
-        n += 1
-
-    return magnetization
+from invrg.rg import majority_rule
 
 
 def renormalization():
 
     betaJ = 0.44
-        
 
 
     data= pickle.load(
@@ -148,7 +94,6 @@ def get_configuration():
             data[key] = configuration
 
 
-        
     pickle.dump(
         data,
         open(
@@ -156,14 +101,8 @@ def get_configuration():
             mode = 'wb'
         )
     )
-        
 
 
-
-
-
-
-get_configuration()
-renormalization()
-
-
+if __name__ == "__main__":
+    get_configuration()
+    renormalization()

@@ -6,12 +6,12 @@ venv/
 *.egg-info/
 .ipynb_checkpoints/
 
-# Build artifacts (compiled from src/cising.pyx and src/ising.hpp)
+# Build artifacts (compiled from src/invrg/ising/)
 build/
 dist/
 *.so
 *.o
-src/cising.cpp
+src/invrg/ising/cising.cpp
 
 # Data, models and results: too large / not source. Regenerate with the scripts.
 *.pickle

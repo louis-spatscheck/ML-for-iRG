@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.interpolate as spip
 import scipy.optimize as spopt
-import autocorr
+from invrg import autocorr
 
 
 data= pickle.load(
