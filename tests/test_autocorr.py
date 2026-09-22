@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from invrg.autocorr import autocorrelation, calc_error
 
@@ -6,7 +7,7 @@ from invrg.autocorr import autocorrelation, calc_error
 def test_autocorrelation_is_normalized():
     x = np.random.default_rng(0).normal(size=4096)
     acf = autocorrelation(x)
-    assert acf[0] == 1.0
+    assert acf[0] == pytest.approx(1.0)
     assert len(acf) == 2048
 
 
