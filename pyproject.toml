@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64", "wheel", "cython>=3.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "invrg"
+version = "0.1.0"
+description = "Machine learning for the inverse renormalization group of the 2D Ising model"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Louis Spatscheck" }]
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "matplotlib",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+# Needed for invrg.models and the training / extrapolation scripts.
+ml = ["torch"]
+test = ["pytest", "nbformat", "nbclient", "ipykernel"]
+examples = ["jupyterlab"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

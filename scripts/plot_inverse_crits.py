@@ -5,12 +5,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.interpolate as spip
 import scipy.optimize as spopt
-import autocorr
+from invrg import autocorr
+from invrg.constants import BETA_OVER_NU, GAMMA_OVER_NU
+from invrg.paths import DATA_DIR, PLOTS_DIR, out_path
 
 
 data= pickle.load(
 open(
-    f'/tikhome/lspatscheck/Documents/bsc/simulation_data/inverse_renorm/beta_crits.pickle',
+    f'{DATA_DIR}/inverse_renorm/beta_crits.pickle',
     'rb'
     )
 )
@@ -46,7 +48,7 @@ plt.rcParams.update({'font.size': 24, 'font.family': 'serif'})
 plt.figure(figsize=(10, 9))
 
 for i in range(len(scheme_a)):
-    y_values = np.abs((progres_inc(scheme_a[i]) - 0.125) / 0.125)
+    y_values = np.abs((progres_inc(scheme_a[i]) - BETA_OVER_NU) / BETA_OVER_NU)
 
     print(y_values)
     if i in [0, 4, 6, 7,8]:
@@ -78,7 +80,7 @@ plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_a_plot_log.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_a_plot_log.pdf'), dpi=300)
 
 plt.show()
 
@@ -90,7 +92,7 @@ plt.rcParams.update({'font.size': 24, 'font.family': 'serif'})
 plt.figure(figsize=(10, 9))
 
 for i in range(len(scheme_b)):
-    y_values = np.abs((progres_inc(scheme_b[i]) - 0.125) / 0.125)
+    y_values = np.abs((progres_inc(scheme_b[i]) - BETA_OVER_NU) / BETA_OVER_NU)
 
     if i in [0, 4, 6, 7,8]:
         if not label_added_x:
@@ -116,18 +118,18 @@ plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_b_plot_log.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_b_plot_log.pdf'), dpi=300)
 
 plt.show()
 
 
 stacked_scheme_a = np.vstack((progres_inc(scheme_a[0]),progres_inc(scheme_a[1]),progres_inc(scheme_a[2]),progres_inc(scheme_a[3]),progres_inc(scheme_a[4]),progres_inc(scheme_a[5]),progres_inc(scheme_a[6]),progres_inc(scheme_a[7]),progres_inc(scheme_a[8])))
-# Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+# Compute the mean at every time step (along the first axis)
 mean_scheme_a = np.mean(stacked_scheme_a, axis=0)
 err_scheme_a = np.std(stacked_scheme_a,axis= 0)/ np.sqrt(9)
 
 stacked_scheme_b = np.vstack((progres_inc(scheme_b[0]),progres_inc(scheme_b[1]),progres_inc(scheme_b[2]),progres_inc(scheme_b[3]),progres_inc(scheme_b[4]),progres_inc(scheme_b[5]),progres_inc(scheme_b[6]),progres_inc(scheme_b[7]),progres_inc(scheme_b[8])))
-# Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+# Compute the mean at every time step (along the first axis)
 mean_scheme_b = np.mean(stacked_scheme_b, axis=0)
 err_scheme_b = np.std(stacked_scheme_b,axis= 0)/ np.sqrt(9)
 
@@ -138,10 +140,10 @@ plt.figure(figsize=(10, 9))
 
 
 
-plt.errorbar(x_values-0.1, (mean_scheme_a - 0.125) / 0.125, yerr=err_scheme_a / 0.125, 
+plt.errorbar(x_values-0.1, (mean_scheme_a - BETA_OVER_NU) / BETA_OVER_NU, yerr=err_scheme_a / BETA_OVER_NU, 
              fmt='o', color = 'blue' , capsize=5, elinewidth=2, markeredgewidth=2, markersize=12, label='Scheme A')
 
-plt.errorbar(x_values+0.1, (mean_scheme_b - 0.125) / 0.125, yerr=err_scheme_b / 0.125, 
+plt.errorbar(x_values+0.1, (mean_scheme_b - BETA_OVER_NU) / BETA_OVER_NU, yerr=err_scheme_b / BETA_OVER_NU, 
              fmt='o', color = 'green', capsize=5, elinewidth=2, markeredgewidth=2, markersize=12, label='Scheme B')
 
 
@@ -160,10 +162,10 @@ plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_mean_all.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_mean_all.pdf'), dpi=300)
 
 stacked_scheme_a = np.vstack((progres_inc(scheme_a[1]),progres_inc(scheme_a[2]),progres_inc(scheme_a[3]),progres_inc(scheme_a[5])))
-# Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+# Compute the mean at every time step (along the first axis)
 mean_scheme_a = np.mean(stacked_scheme_a, axis=0)
 err_scheme_a = np.std(stacked_scheme_a,axis= 0)/ np.sqrt(4*np.array([1,2,3,4,5,6,7]))
 
@@ -179,20 +181,20 @@ plt.figure(figsize=(10, 9))
 
 
 
-plt.errorbar(x_values-0.1, (mean_scheme_a - 0.125) / 0.125, yerr=err_scheme_a / 0.125, 
+plt.errorbar(x_values-0.1, (mean_scheme_a - BETA_OVER_NU) / BETA_OVER_NU, yerr=err_scheme_a / BETA_OVER_NU, 
              fmt='o', color = 'blue' , capsize=5, elinewidth=2, markeredgewidth=2, markersize=12, label='Scheme A')
 print("Results:",mean_scheme_b )
-plt.errorbar(x_values+0.1, (mean_scheme_b - 0.125) / 0.125, yerr=err_scheme_b / 0.125, 
+plt.errorbar(x_values+0.1, (mean_scheme_b - BETA_OVER_NU) / BETA_OVER_NU, yerr=err_scheme_b / BETA_OVER_NU, 
              fmt='o', color = 'green', capsize=5, elinewidth=2, markeredgewidth=2, markersize=12, label='Scheme B')
 
 
 print("Gamma:")
 
 print((mean_scheme_a , err_scheme_a))
-print((mean_scheme_a - 0.125) / 0.125, err_scheme_a / 0.125)
+print((mean_scheme_a - BETA_OVER_NU) / BETA_OVER_NU, err_scheme_a / BETA_OVER_NU)
 
 print((mean_scheme_b , err_scheme_b))
-print((mean_scheme_b - 0.125) / 0.125, err_scheme_b / 0.125)
+print((mean_scheme_b - BETA_OVER_NU) / BETA_OVER_NU, err_scheme_b / BETA_OVER_NU)
 
 
 plt.axhline(y=0.00973, color='r', linestyle='--', linewidth=1, label='Standard RG')
@@ -221,7 +223,7 @@ plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_mean.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_mean.pdf'), dpi=300)
 
 plt.show()
 
@@ -234,10 +236,10 @@ plt.figure(figsize=(10, 9))
 
 
 
-plt.errorbar(x_values-0.1, (mean_scheme_a - 0.125) / 0.125, yerr=err_scheme_a / 0.125, 
+plt.errorbar(x_values-0.1, (mean_scheme_a - BETA_OVER_NU) / BETA_OVER_NU, yerr=err_scheme_a / BETA_OVER_NU, 
              fmt='o', color = 'blue' , capsize=5, elinewidth=2, markeredgewidth=2, markersize=12, label='Scheme A')
 print("Results:",mean_scheme_b )
-plt.errorbar(x_values+0.1, (mean_scheme_b - 0.125) / 0.125, yerr=err_scheme_b / 0.125, 
+plt.errorbar(x_values+0.1, (mean_scheme_b - BETA_OVER_NU) / BETA_OVER_NU, yerr=err_scheme_b / BETA_OVER_NU, 
              fmt='o', color = 'green', capsize=5, elinewidth=2, markeredgewidth=2, markersize=12, label='Scheme B')
 
 
@@ -267,7 +269,7 @@ plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_mean_loglog.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_mean_loglog.pdf'), dpi=300)
 
 plt.show()
 
@@ -280,7 +282,7 @@ plt.figure(figsize=(10, 6))
 
 
 
-plt.errorbar(x_values, (mean_scheme_a - 0.125) / 0.125, yerr=err_scheme_a / 0.125, 
+plt.errorbar(x_values, (mean_scheme_a - BETA_OVER_NU) / BETA_OVER_NU, yerr=err_scheme_a / BETA_OVER_NU, 
              fmt='o', capsize=5, elinewidth=2, markeredgewidth=2, label='Scheme B')
 
 plt.semilogx()
@@ -293,7 +295,7 @@ plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_b_mean.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_b_mean.pdf'), dpi=300)
 
 plt.show()
 
@@ -301,7 +303,7 @@ plt.show()
 
 data= pickle.load(
 open(
-    f'/tikhome/lspatscheck/Documents/bsc/simulation_data/inverse_renorm/gamma_crits.pickle',
+    f'{DATA_DIR}/inverse_renorm/gamma_crits.pickle',
     'rb'
     )
 )
@@ -331,7 +333,7 @@ plt.rcParams.update({'font.size': 24, 'font.family': 'serif'})
 plt.figure(figsize=(10, 9))
 
 for i in range(len(scheme_a)):
-    y_values = np.abs((progres_inc(scheme_a[i]) - 1.75) / 1.75)
+    y_values = np.abs((progres_inc(scheme_a[i]) - GAMMA_OVER_NU) / GAMMA_OVER_NU)
     if i in [0, 4, 6, 7,8]:
         if not label_added_x:
             plt.plot(x_values, y_values, 'rx--', label=' "not converging" ',markeredgewidth=4, markersize=12)
@@ -355,7 +357,7 @@ plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_a_plot_gamma.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_a_plot_gamma.pdf'), dpi=300)
 
 plt.show()
 
@@ -369,7 +371,7 @@ plt.rcParams.update({'font.size': 24, 'font.family': 'serif'})
 plt.figure(figsize=(10,9))
 
 for i in range(len(scheme_b)):
-    y_values = np.abs((progres_inc(scheme_b[i]) - 1.75) / 1.75)
+    y_values = np.abs((progres_inc(scheme_b[i]) - GAMMA_OVER_NU) / GAMMA_OVER_NU)
     if i in [0, 4, 6, 7,8]:
         if not label_added_x:
             plt.plot(x_values, y_values, 'rx--', label=' "not converging" ',markeredgewidth=4, markersize=12)
@@ -393,17 +395,17 @@ plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_b_plot_gamma.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_b_plot_gamma.pdf'), dpi=300)
 
 plt.show()
 
 stacked_scheme_a = np.vstack((progres_inc(scheme_a[1]),progres_inc(scheme_a[2]),progres_inc(scheme_a[3]),progres_inc(scheme_a[5])))
-# Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+# Compute the mean at every time step (along the first axis)
 mean_scheme_a = np.mean(stacked_scheme_a, axis=0)
 err_scheme_a = np.std(stacked_scheme_a,axis= 0)/ np.sqrt(4*np.array([1,2,3,4,5,6,7]))
 
 stacked_scheme_b = np.vstack((progres_inc(scheme_b[1]),progres_inc(scheme_b[2]),progres_inc(scheme_b[3]),progres_inc(scheme_b[5])))
-# Berechnen des Mittelwerts zu jedem Zeitpunkt (entlang der ersten Achse)
+# Compute the mean at every time step (along the first axis)
 mean_scheme_b = np.mean(stacked_scheme_b, axis=0)
 err_scheme_b = np.std(stacked_scheme_b,axis= 0)/ np.sqrt(4*np.array([1,2,3,4,5,6,7]))
 
@@ -419,19 +421,19 @@ plt.figure(figsize=(10, 9))
 
 
 
-plt.errorbar(x_values-0.1, (mean_scheme_a - 1.75) / 1.75, yerr=err_scheme_a / 1.75, 
+plt.errorbar(x_values-0.1, (mean_scheme_a - GAMMA_OVER_NU) / GAMMA_OVER_NU, yerr=err_scheme_a / GAMMA_OVER_NU, 
              fmt='bo', capsize=3, elinewidth=1,markeredgewidth=2, markersize=12, label='Scheme A')
 
-plt.errorbar(x_values+0.1, (mean_scheme_b - 1.75) / 1.75, yerr=err_scheme_b / 1.75, 
+plt.errorbar(x_values+0.1, (mean_scheme_b - GAMMA_OVER_NU) / GAMMA_OVER_NU, yerr=err_scheme_b / GAMMA_OVER_NU, 
              fmt='go', capsize=3, elinewidth=1,markeredgewidth=2, markersize=12,label='Scheme B')
 
 print("Gamma:")
 
 print((mean_scheme_a , err_scheme_a))
-print((mean_scheme_a - 1.75) / 1.75, err_scheme_a / 1.75)
+print((mean_scheme_a - GAMMA_OVER_NU) / GAMMA_OVER_NU, err_scheme_a / GAMMA_OVER_NU)
 
 print((mean_scheme_b , err_scheme_b))
-print((mean_scheme_b - 1.75) / 1.75, err_scheme_b / 1.75)
+print((mean_scheme_b - GAMMA_OVER_NU) / GAMMA_OVER_NU, err_scheme_b / GAMMA_OVER_NU)
 
 plt.axhline(y=0.0115, color='r', linestyle='--', linewidth=1, label='Standard RG')
 
@@ -456,7 +458,7 @@ plt.ylabel('$ \\langle \\Delta_\\mathrm{rela} \\left( \\gamma / \\nu \\right) \\
 #plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_mean_gamma.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_mean_gamma.pdf'), dpi=300)
 plt.show()
 
 ###########################
@@ -469,10 +471,10 @@ plt.figure(figsize=(10, 9))
 
 
 
-plt.errorbar(x_values-0.1, (mean_scheme_a - 1.75) / 1.75, yerr=err_scheme_a / 1.75, 
+plt.errorbar(x_values-0.1, (mean_scheme_a - GAMMA_OVER_NU) / GAMMA_OVER_NU, yerr=err_scheme_a / GAMMA_OVER_NU, 
              fmt='bo', capsize=3, elinewidth=1,markeredgewidth=2, markersize=12, label='Scheme A')
 
-plt.errorbar(x_values+0.1, (mean_scheme_b - 1.75) / 1.75, yerr=err_scheme_b / 1.75, 
+plt.errorbar(x_values+0.1, (mean_scheme_b - GAMMA_OVER_NU) / GAMMA_OVER_NU, yerr=err_scheme_b / GAMMA_OVER_NU, 
              fmt='go', capsize=3, elinewidth=1,markeredgewidth=2, markersize=12,label='Scheme B')
 
 plt.axhline(y=0.0115, color='r', linestyle='--', linewidth=1, label='Standard RG')
@@ -496,7 +498,7 @@ plt.ylabel('$ \\langle \\Delta_\\mathrm{rela} \\left( \\gamma / \\nu \\right) \\
 #plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.legend(loc='best', fontsize=24)
 plt.tight_layout()
-plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_mean_gamma_loglog.pdf', dpi=300)
+plt.savefig(out_path(f'{PLOTS_DIR}/scheme_mean_gamma_loglog.pdf'), dpi=300)
 plt.show()
 
 ##########################
@@ -518,6 +520,6 @@ plt.legend(loc='best', fontsize=12)
 plt.tight_layout()
 
 # Save the plot
-#plt.savefig('/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/scheme_a_plot.pdf', dpi=300)
+#plt.savefig(out_path(f'{PLOTS_DIR}/scheme_a_plot.pdf'), dpi=300)
 
 plt.show()

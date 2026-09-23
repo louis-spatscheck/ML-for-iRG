@@ -1,3 +1,14 @@
+import gzip
+import pickle
+
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.interpolate as spip
+
+from invrg import autocorr
+from invrg.constants import BETA_C_FORWARD, BETA_OVER_NU, GAMMA_OVER_NU
+from invrg.paths import DATA_DIR, PLOTS_DIR, SCRATCH_DIR, out_path
+
 
 def analysis():
 
@@ -16,7 +27,7 @@ def analysis():
 
     L16_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size16/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size16/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -29,7 +40,7 @@ def analysis():
 
     L32_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size32/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size32/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -42,7 +53,7 @@ def analysis():
 
     L64_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size64/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size64/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -57,7 +68,7 @@ def analysis():
 
     L128_result = pickle.load(
         gzip.open(
-        f'/tikhome/lspatscheck/Documents/bsc/simulation_data/lattice_size128/betaJ{betaJ}/final_result/data_2e6.gz',
+        f'{DATA_DIR}/lattice_size128/betaJ{betaJ}/final_result/data_2e6.gz',
         mode = 'rb'
         )
     )
@@ -77,21 +88,21 @@ def analysis():
 
     config64= pickle.load(
     open(
-         f'/data/lspatscheck/forward_renorm/128/config_renorm64.pickle',
+         f'{SCRATCH_DIR}/forward_renorm/128/config_renorm64.pickle',
          'rb'
         )
     )
 
     config32= pickle.load(
     open(
-         f'/data/lspatscheck/forward_renorm/128/config_renorm32.pickle',
+         f'{SCRATCH_DIR}/forward_renorm/128/config_renorm32.pickle',
          'rb'
         )
     )
 
     config16= pickle.load(
     open(
-         f'/data/lspatscheck/forward_renorm/128/config_renorm16.pickle',
+         f'{SCRATCH_DIR}/forward_renorm/128/config_renorm16.pickle',
          'rb'
         )
     )
@@ -136,15 +147,14 @@ def analysis():
     dmag32re = spip.interp1d(beta,mag32re)
     dmag16re = spip.interp1d(beta,mag16re)
 
-    beta_c = 0.5 * np.log(1 + np.sqrt(2)) 
-    beta_c =0.44048
+    beta_c = BETA_C_FORWARD
 
-    crit_renorm128_64 = -np.log(dmag64re(beta_c )/dmag128(0.44048)) /(np.log(2)*(-1))
-    crit_renorm128_32 = -np.log(dmag32re(beta_c )/dmag128(0.44048)) /(np.log(2)*(-2))
-    crit_renorm128_16 = -np.log(dmag16re(beta_c )/dmag128(0.44048)) /(np.log(2)*(-3))
-    crit_renorm64_32 = -np.log(dmag32re(beta_c )/dmag64re(0.44048)) /(np.log(2)*(-1))
-    crit_renorm32_16 = -np.log(dmag16re(beta_c )/dmag32re(0.44048)) /(np.log(2)*(-1))
-    crit_renorm64_16 = -np.log(dmag16re(beta_c )/dmag64re(0.44048)) /(np.log(2)*(-2))
+    crit_renorm128_64 = -np.log(dmag64re(beta_c )/dmag128(BETA_C_FORWARD)) /(np.log(2)*(-1))
+    crit_renorm128_32 = -np.log(dmag32re(beta_c )/dmag128(BETA_C_FORWARD)) /(np.log(2)*(-2))
+    crit_renorm128_16 = -np.log(dmag16re(beta_c )/dmag128(BETA_C_FORWARD)) /(np.log(2)*(-3))
+    crit_renorm64_32 = -np.log(dmag32re(beta_c )/dmag64re(BETA_C_FORWARD)) /(np.log(2)*(-1))
+    crit_renorm32_16 = -np.log(dmag16re(beta_c )/dmag32re(BETA_C_FORWARD)) /(np.log(2)*(-1))
+    crit_renorm64_16 = -np.log(dmag16re(beta_c )/dmag64re(BETA_C_FORWARD)) /(np.log(2)*(-2))
 
     data = [crit_renorm32_16,crit_renorm64_16,crit_renorm128_16,crit_renorm32_16,crit_renorm64_32,crit_renorm128_64]    
 
@@ -153,7 +163,7 @@ def analysis():
     pickle.dump(
         data,
         open(
-            f'/tikhome/lspatscheck/Documents/bsc/simulation_data/standard_renorm/beta_L128.pickle',
+            out_path(f'{DATA_DIR}/standard_renorm/beta_L128.pickle'),
             mode = 'wb'
         )
     )
@@ -190,9 +200,9 @@ def analysis():
     err_down3 = np.array([crit_renorm32_16_err2, crit_renorm64_16_err2, crit_renorm128_16_err2]) -data3
 
     # Calculate relative deviations
-    relative_deviation1 = (data1 - 0.125) / 0.125
-    relative_deviation2 = (data2 - 0.125) / 0.125
-    relative_deviation3 = (data3 - 0.125) / 0.125
+    relative_deviation1 = (data1 - BETA_OVER_NU) / BETA_OVER_NU
+    relative_deviation2 = (data2 - BETA_OVER_NU) / BETA_OVER_NU
+    relative_deviation3 = (data3 - BETA_OVER_NU) / BETA_OVER_NU
 
 
     relative_down1 = err_down1 / data1
@@ -237,14 +247,14 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/forward_crits_rela.png', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/forward_crits_rela.png'), dpi=300, bbox_inches='tight')
     plt.show()
 
     # Create figures with error bars
     fig, ax = plt.subplots(1, 3, figsize=(18, 6))
 
     ax[0].errorbar([1, 2, 3], data1, yerr=[-err_down1,err_up1],  fmt='o', capsize=8, elinewidth=2, label='Data Set 1')
-    ax[0].axhline(y=0.125, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\beta/\\nu$")
+    ax[0].axhline(y=BETA_OVER_NU, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\beta/\\nu$")
     ax[0].set_title('Relative Deviation with Error Bars - Set 1', fontsize=16)
     ax[0].set_xlabel('Data Point', fontsize=14)
     ax[0].set_ylabel('Relative Deviation', fontsize=14)
@@ -252,7 +262,7 @@ def analysis():
     ax[0].legend(fontsize=12)
 
     ax[1].errorbar([1, 2, 3], data2, yerr=[np.array([-1,1,-1])*err_down2,err_up2], fmt='s', capsize=8, elinewidth=2, label='Data Set 2')
-    ax[1].axhline(y=0.125, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\beta/\\nu$")
+    ax[1].axhline(y=BETA_OVER_NU, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\beta/\\nu$")
     ax[1].set_title('Relative Deviation with Error Bars - Set 2', fontsize=16)
     ax[1].set_xlabel('Data Point', fontsize=14)
     ax[1].set_ylabel('Relative Deviation', fontsize=14)
@@ -260,7 +270,7 @@ def analysis():
     ax[1].legend(fontsize=12)
 
     ax[2].errorbar([1, 2, 3], data3, yerr=[-err_down3,err_up3], fmt='^', capsize=8, elinewidth=2, label='Data Set 3')
-    ax[2].axhline(y=0.125, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\beta/\\nu$")
+    ax[2].axhline(y=BETA_OVER_NU, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\beta/\\nu$")
     ax[2].set_title('Relative Deviation with Error Bars - Set 3', fontsize=16)
     ax[2].set_xlabel('Data Point', fontsize=14)
     ax[2].set_ylabel('Relative Deviation', fontsize=14)
@@ -272,44 +282,44 @@ def analysis():
     plt.show()
 
     L = [64,32,16]
-# Einstellungen für einheitliche Schriftarten
+# Use consistent fonts
     plt.rcParams.update({'font.size': 24, 'font.family': 'serif'})
 
-    # Plotten
+    # Plot
     for i in range(len(L)):
         fig, ax = plt.subplots(figsize=(12, 8))
 
-        # Originale Magnetisierung mit Fehlerbalken
+        # Original magnetization with error band
         ax.plot(beta, mag[i], "r-", label=f"L={L[i]}", linewidth=2)
         ax.fill_between(beta, mag[i] - mag_error[i], mag[i] + mag_error[i], color='r', alpha=0.2)
 
-        # Renormierte Magnetisierung mit Fehlerbalken
+        # Renormalized magnetization with error band
         ax.plot(beta, magre[i], "b-.", label=f"L'={L[i]}", linewidth=2)
         ax.fill_between(beta, magre[i] - magre_error[i], magre[i] + magre_error[i], color='b', alpha=0.2)
 
-        # Achsenbeschriftungen und Titel
+        # Axis labels and title
         ax.set_xlabel('$\\beta$', fontsize=24)
         ax.set_ylabel('$ \\langle \\left| m \\right| \\rangle $', fontsize=24)
         #ax.set_title(f'Reweighted Magnetization at $\\beta_c = {betaJ}$', fontsize=24, pad=20)
 
-        # Legende
+        # Legend
         ax.legend(fontsize=28)
 
-        # Raster hinzufügen
+        # Add grid
         #ax.grid(True, linestyle='--', alpha=0.5)
         plt.xticks([0.4400,0.4406,0.4410], ["$0.4400$","$0.4406$","$0.4410$"], fontsize=24)
-        # Achsenskalierung verbessern
+        # Improve axis scaling
         ax.set_xlim([0.440, 0.441])
         print([min([m.min() for m in mag[i] ]), max([m.max() for m in mag[i] ]) ])
         ax.set_ylim([min([m.min() for m in magre[i]-0.002 ]), max([m.max() for m in magre[i]+0.002 ]) ])
 
-        # Layout verbessern
+        # Improve layout
         plt.tight_layout()
 
-        # Speichern der Abbildung
-        plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/group_flow_{L[i]}.pdf', dpi=300, bbox_inches='tight')
+        # Save the figure
+        plt.savefig(out_path(f'{PLOTS_DIR}/group_flow_{L[i]}.pdf'), dpi=300, bbox_inches='tight')
 
-        # Zeigen der Abbildung
+        # Show the figure
         plt.show()
     
 
@@ -379,7 +389,7 @@ def analysis():
     dsusz32re = spip.interp1d(beta,susz32re)
     dsusz16re = spip.interp1d(beta,susz16re)
 
-    beta_c =0.44048
+    beta_c =BETA_C_FORWARD
 
     crit_renorm128_64 = np.log(dsusz64re(beta_c)/dsusz128(beta_c))/(np.log(2)*(-1))
     crit_renorm128_32 = np.log(dsusz32re(beta_c)/dsusz128(beta_c)) /(np.log(2)*(-2))
@@ -409,7 +419,7 @@ def analysis():
     pickle.dump(
         data,
         open(
-            f'/tikhome/lspatscheck/Documents/bsc/simulation_data/standard_renorm/gamma_L128t.pickle',
+            out_path(f'{DATA_DIR}/standard_renorm/gamma_L128t.pickle'),
             mode = 'wb'
         )
     )
@@ -427,9 +437,9 @@ def analysis():
     err_down3 = np.array([crit_renorm32_16_err2, crit_renorm64_16_err2, crit_renorm128_16_err2]) -data3
 
     # Calculate relative deviations
-    relative_deviation1 = (data1 - 1.75) / 1.75
-    relative_deviation2 = (data2 - 1.75) / 1.75
-    relative_deviation3 = (data3 - 1.75) / 1.75
+    relative_deviation1 = (data1 - GAMMA_OVER_NU) / GAMMA_OVER_NU
+    relative_deviation2 = (data2 - GAMMA_OVER_NU) / GAMMA_OVER_NU
+    relative_deviation3 = (data3 - GAMMA_OVER_NU) / GAMMA_OVER_NU
 
     relative_down1 = err_down1 / data1
     relative_down2 = err_down2 / data2
@@ -473,14 +483,14 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/forward_crits_susz_rela.png', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/forward_crits_susz_rela.png'), dpi=300, bbox_inches='tight')
     plt.show()
 
     # Create figures with error bars
     fig, ax = plt.subplots(1, 3, figsize=(18, 6))
 
     ax[0].errorbar([1, 2, 3], data1, yerr=[-err_down1,err_up1],  fmt='o', capsize=8, elinewidth=2, label='Data Set 1')
-    ax[0].axhline(y=1.75, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\gamma/\\nu$")
+    ax[0].axhline(y=GAMMA_OVER_NU, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\gamma/\\nu$")
     ax[0].set_title('Relative Deviation with Error Bars - Set 1', fontsize=16)
     ax[0].set_xlabel('Data Point', fontsize=14)
     ax[0].set_ylabel('Relative Deviation', fontsize=14)
@@ -488,7 +498,7 @@ def analysis():
     ax[0].legend(fontsize=12)
 
     ax[1].errorbar([1, 2, 3], data2, yerr=[-err_down2,err_up2], fmt='s', capsize=8, elinewidth=2, label='Data Set 2')
-    ax[1].axhline(y=1.75, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\gamma/\\nu$")
+    ax[1].axhline(y=GAMMA_OVER_NU, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\gamma/\\nu$")
     ax[1].set_title('Relative Deviation with Error Bars - Set 2', fontsize=16)
     ax[1].set_xlabel('Data Point', fontsize=14)
     ax[1].set_ylabel('Relative Deviation', fontsize=14)
@@ -496,7 +506,7 @@ def analysis():
     ax[1].legend(fontsize=12)
 
     ax[2].errorbar([1, 2, 3], data3, yerr=[-err_down3,err_up3], fmt='^', capsize=8, elinewidth=2, label='Data Set 3')
-    ax[2].axhline(y=1.75, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\gamma/\\nu$")
+    ax[2].axhline(y=GAMMA_OVER_NU, color='gray', linestyle='--', linewidth=1,label = "Critical Exponent $\\gamma/\\nu$")
     ax[2].set_title('Relative Deviation with Error Bars - Set 3', fontsize=16)
     ax[2].set_xlabel('Data Point', fontsize=14)
     ax[2].set_ylabel('Relative Deviation', fontsize=14)
@@ -504,46 +514,46 @@ def analysis():
     ax[2].legend(fontsize=12)
 
     plt.tight_layout()
-    #plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/forward_crits_susz_abs.png', dpi=300, bbox_inches='tight')
+    #plt.savefig(out_path(f'{PLOTS_DIR}/forward_crits_susz_abs.png'), dpi=300, bbox_inches='tight')
     plt.show()
 
-# Einstellungen für einheitliche Schriftarten
+# Use consistent fonts
     plt.rcParams.update({'font.size': 14, 'font.family': 'serif'})
 
-    # Plotten
+    # Plot
     for i in range(len(L)):
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Originale Magnetisierung mit Fehlerbalken
+        # Original magnetization with error band
         ax.plot(beta, susz[i], "r-", label=f"L={L[i]}", linewidth=2)
         ax.fill_between(beta, susz[i] - susz_error[i], susz[i] + susz_error[i], color='r', alpha=0.2)
 
-        # Renormierte Magnetisierung mit Fehlerbalken
+        # Renormalized magnetization with error band
         ax.plot(beta, suszre[i], "b-.", label=f"L'={L[i]}", linewidth=2)
         ax.fill_between(beta, suszre[i] - suszre_error[i], suszre[i] + suszre_error[i], color='b', alpha=0.2)
 
-        # Achsenbeschriftungen und Titel
+        # Axis labels and title
         ax.set_xlabel(r'$\beta$', fontsize=16)
         ax.set_ylabel(r'$\chi$', fontsize=16)
-        ax.set_title(f'Reweighted Suszeptibility at $\\beta_c = {betaJ}$', fontsize=18, pad=20)
+        ax.set_title(f'Reweighted Susceptibility at $\\beta_c = {betaJ}$', fontsize=18, pad=20)
 
-        # Legende
+        # Legend
         ax.legend(fontsize=14)
 
-        # Raster hinzufügen
+        # Add grid
         ax.grid(True, linestyle='--', alpha=0.5)
 
-        # Achsenskalierung verbessern
+        # Improve axis scaling
         ax.set_xlim([beta.min(), beta.max()])
         ax.set_ylim([min([m.min() for m in susz + suszre]) - 0.02, max([m.max() for m in susz + suszre]) + 0.02])
 
-        # Layout verbessern
+        # Improve layout
         plt.tight_layout()
 
-        # Speichern der Abbildung
-        plt.savefig(f'/tikhome/lspatscheck/Documents/bsc/plots_for_presentation/group_flow_{L[i]}_susz.pdf', dpi=300, bbox_inches='tight')
+        # Save the figure
+        plt.savefig(out_path(f'{PLOTS_DIR}/group_flow_{L[i]}_susz.pdf'), dpi=300, bbox_inches='tight')
 
-        # Zeigen der Abbildung
+        # Show the figure
         plt.show()
 
 

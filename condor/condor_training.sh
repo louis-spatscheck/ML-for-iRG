@@ -1,58 +1,61 @@
 #!/bin/bash
+# Prepare (and optionally submit) HTCondor jobs for training the CNNs.
+#
+#   bash condor/condor_training.sh           # only write the job files
+#   bash condor/condor_training.sh condor    # write and submit them
+#
+# One job per (model, sample size), running scripts/train.py. Results:
+# $OUT_DIR/<model>/sample_size_<n>/. Jobs whose DONE file exists are skipped.
+# Requires the package to be installed (bash condor/build.sh).
+#
+# Settings (environment variables):
+#   DATA_DIR        directory containing train_data/   (required)
+#   OUT_DIR         output directory                   (default: ./training_results)
+#   MODELS          shallow, deep and/or unet          (default: "unet")
+#   SAMPLE_SIZES    training set sizes                 (default: "5000")
+#   REQUEST_MEMORY  memory per job                     (default: 40GB)
+#   CPUS            CPUs per job                       (default: 1)
 run_flag=$1
 
+if [ -z "${DATA_DIR}" ]; then
+    echo "Please set DATA_DIR to the directory containing train_data/." >&2
+    exit 1
+fi
+OUT_DIR=${OUT_DIR:-$PWD/training_results}
+models=${MODELS:-"unet"}
+sample_sizes=${SAMPLE_SIZES:-"5000"}
+request_memory=${REQUEST_MEMORY:-"40GB"}
+CPUS=${CPUS:-1}
+repo_dir=$(cd "$(dirname "$0")/.." && pwd)
 
-
-request_memory="40GB"
-CPUS="1"
-runs="1"
-
-wd=`pwd`
-
-#architectures="simple_model simple_model_ReLu step_model step_model_ReLu UNet_model_ResNet ResNet_model ResNet_model_ReLu ResNet_model_big ResStep_model_Tanh ResStepDown_model_Tanh"
-sample_sizes="5000"
-
-
-#architectures="ResStepDown_big_500 ResStepDown_big_1200 ResStepDown_big_2400 ResStepDown_big_3600 ResStepDown_layers_500 ResStepDown_layers_1000 ResStepDown_layers_5000 ResStepDown_simple_500 ResStepDown_simple_1000 ResStepDown_simple_5000 ResStepDown_simple+_7000 ResStepDown_val_500 ResStepDown_val_1000 ResStepDown_val_5000 ResStepDown_simple+_7000"
-architectures="RL_UNet_cat_ReLu RL_UNet_model_ResNet_ReLu ResStepDown_train"
-
-
-in_fns="1"
-
-for run in ${runs}; do
-for architecture in ${architectures}; do
+for model in ${models}; do
 for sample_size in ${sample_sizes}; do
-    wdir="/tikhome/lspatscheck/Documents/bsc/simulation_data/CNN_training/Results/model_${architecture}/sample_size_${sample_size}/futher"
-    mkdir -p $wdir
-    cd $wdir
-    wdir_path=`pwd`
-    echo $wdir_path
-    con_file="JOB.condor"
+    wdir="${OUT_DIR}/${model}/sample_size_${sample_size}"
+    mkdir -p "$wdir"
+    wdir_path=$(cd "$wdir" && pwd)
+    echo "$wdir_path"
+    con_file="${wdir_path}/JOB.condor"
 
-    OUTPUT_FILE=${wdir_path}/outfile.pkl
-	
-    echo "universe = vanilla" > $con_file
-    echo "request_CPUs = ${CPUS}" >> $con_file
-    echo "request_memory = ${request_memory}" >> $con_file
-    echo "executable = /usr/bin/mpiexec" >> $con_file
-    echo "arguments = -n ${CPUS} python3 /tikhome/lspatscheck/Documents/bsc/simulation_scripts/${architecture}.py --sample_size ${sample_size}" >> $con_file
-    echo "output = ${wdir_path}/condor.out" >> $con_file
-    echo "error = ${wdir_path}/condor.err" >> $con_file
-    echo "log = ${wdir_path}/condor.log" >> $con_file
-    echo "getenv = true" >> $con_file
-    echo "queue" >> $con_file
-    if [ -f "$OUTPUT_FILE" ]; then
-	    echo "$OUTPUT_FILE exists."
-    else
-	    if [ "${run_flag}" == "condor" ]; then
-		    	condor_submit $con_file -batch-name big_training
-	    fi
+    {
+        echo "universe = vanilla"
+        echo "request_CPUs = ${CPUS}"
+        echo "request_memory = ${request_memory}"
+        echo "executable = /usr/bin/mpiexec"
+        echo "arguments = -n ${CPUS} python3 ${repo_dir}/scripts/train.py --model ${model} --sample-size ${sample_size} --data-dir ${DATA_DIR} --output-dir ${wdir_path}"
+        echo "initialdir = ${wdir_path}"
+        echo "output = ${wdir_path}/condor.out"
+        echo "error = ${wdir_path}/condor.err"
+        echo "log = ${wdir_path}/condor.log"
+        echo "getenv = true"
+        echo "queue"
+    } > "$con_file"
+
+    # scripts/train.py writes DONE when all runs have finished
+    if [ -f "${wdir_path}/DONE" ]; then
+        echo "${wdir_path}/DONE exists."
+    elif [ "${run_flag}" == "condor" ]; then
+        condor_submit "$con_file" -batch-name training
     fi
-    cd ..
-
-    cd $wd
-
-done
 done
 done
 exit 0

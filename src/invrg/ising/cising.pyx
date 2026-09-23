@@ -6,7 +6,7 @@ from libcpp cimport bool
 # declare the interface to the C code
 cdef extern from "ising.hpp":
     cppclass Ising:
-        Ising(double beta, int length)
+        Ising(double beta, int length, unsigned int seed)
         int get_spin(int row, int column)
         void set_spin(int row, int column, int new_spin)
         double get_energy()
@@ -20,9 +20,9 @@ cdef class IsingModel:
   cdef shared_ptr[Ising] c_ising
   cdef int length
 
-  def __init__(self, double beta, int length):
+  def __init__(self, double beta, int length, unsigned int seed=42):
     self.length = length
-    self.c_ising = make_shared[Ising](beta, length)
+    self.c_ising = make_shared[Ising](beta, length, seed)
 
   def as_numpy(self):
     return np.array(self.c_ising.get().get_data()).reshape((self.length, self.length))
